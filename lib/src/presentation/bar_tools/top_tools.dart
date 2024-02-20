@@ -142,64 +142,65 @@ class _TopToolsState extends State<TopTools> {
                 // ),
 
                 ToolButton(
-                    backGroundColor: Colors.black12,
-                    onTap: () async {
-                      if (paintingNotifier.lines.isNotEmpty ||
-                          itemNotifier.draggableWidget.isNotEmpty) {
-                        showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (BuildContext context) {
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Card(
-                                      color: Colors.white,
-                                      child: Container(
-                                          margin: const EdgeInsets.all(50),
-                                          child:
-                                              const CircularProgressIndicator())),
-                                ],
-                              );
-                            });
-                        for (var element in itemNotifier.draggableWidget) {
-                          if (element.type == ItemType.gif ||
-                              element.animationType != TextAnimationType.none) {
-                            setState(() {
-                              _createVideo = true;
-                            });
-                          }
+                  backGroundColor: Colors.black12,
+                  onTap: () async {
+                    if (paintingNotifier.lines.isNotEmpty ||
+                        itemNotifier.draggableWidget.isNotEmpty) {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Card(
+                                    color: Colors.white,
+                                    child: Container(
+                                        margin: const EdgeInsets.all(50),
+                                        child:
+                                            const CircularProgressIndicator())),
+                              ],
+                            );
+                          });
+                      for (var element in itemNotifier.draggableWidget) {
+                        if (element.type == ItemType.gif ||
+                            element.animationType != TextAnimationType.none) {
+                          setState(() {
+                            _createVideo = true;
+                          });
                         }
-                        if (_createVideo) {
-                          debugPrint('creating video');
-                          await widget.renderWidget!();
-                        } else {
-                          debugPrint('creating image');
-                          var response = await takePicture(
-                              contentKey: widget.contentKey,
-                              context: context,
-                              saveToGallery: true,
-                              fileName: controlNotifier.folderName);
-                          if (response) {
-                            showToast('Successfully saved');
-                          } else {}
-                        }
-                        // ignore: use_build_context_synchronously
-                        Navigator.of(context, rootNavigator: true).pop();
-                      } else {
-                        showToast('Design something to save image');
                       }
+                      if (_createVideo) {
+                        debugPrint('creating video');
+                        await widget.renderWidget!();
+                      } else {
+                        debugPrint('creating image');
+                        var response = await takePicture(
+                            contentKey: widget.contentKey,
+                            context: context,
+                            saveToGallery: true,
+                            fileName: controlNotifier.folderName);
+                        if (response) {
+                          showToast('Successfully saved');
+                        } else {}
+                      }
+                      // ignore: use_build_context_synchronously
+                      Navigator.of(context, rootNavigator: false).pop();
+                    } else {
+                      showToast('Design something to save image');
+                    }
 
-                      setState(() {
-                        _createVideo = false;
-                      });
-                    },
-                    child: const ImageIcon(
-                      AssetImage('assets/icons/download.png',
-                          package: 'vs_story_designer'),
-                      color: Colors.white,
-                      size: 20,
-                    )),
+                    setState(() {
+                      _createVideo = false;
+                    });
+                  },
+                  child: const ImageIcon(
+                    AssetImage('assets/icons/download.png',
+                        package: 'vs_story_designer'),
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
               ],
             ),
           ),
