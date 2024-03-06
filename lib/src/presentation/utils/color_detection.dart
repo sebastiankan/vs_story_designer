@@ -40,7 +40,7 @@ class ColorDetection {
     img.Pixel pixel32 = photo!.getPixelSafe(px.toInt(), py.toInt());
     Color hex = Color.fromARGB(pixel32.a.toInt(), pixel32.r.toInt(),
         pixel32.g.toInt(), pixel32.b.toInt());
-    stateController!.add(hex);
+    if (!(stateController?.isClosed ?? true)) stateController!.add(hex);
 
     return hex;
   }
