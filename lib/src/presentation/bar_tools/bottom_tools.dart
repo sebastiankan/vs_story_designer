@@ -1,9 +1,11 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 import 'package:vs_media_picker/vs_media_picker.dart';
+import 'package:vs_story_designer/src/domain/models/editable_items.dart';
 import 'package:vs_story_designer/src/domain/providers/notifiers/control_provider.dart';
 import 'package:vs_story_designer/src/domain/providers/notifiers/draggable_widget_notifier.dart';
 import 'package:vs_story_designer/src/domain/providers/notifiers/painting_notifier.dart';
@@ -60,13 +62,14 @@ class BottomTools extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                             child: GestureDetector(
                               onTap: () {
+                                showPickSourceBottomSheet(
+                                    onPick: onDone,
+                                    itemProvider: itemNotifier,
+                                    scrollNotifier: scrollNotifier,
+                                    controlNotifier: controlNotifier,
+                                    context: context);
+
                                 /// scroll to gridView page
-                                if (controlNotifier.mediaPath.isEmpty) {
-                                  scrollNotifier.pageController.animateToPage(1,
-                                      duration:
-                                          const Duration(milliseconds: 300),
-                                      curve: Curves.ease);
-                                }
                               },
                               child: const CoverThumbnail(
                                 thumbnailQuality: 150,
@@ -251,6 +254,66 @@ class BottomTools extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(width: 1.4, color: Colors.white)),
       child: child,
+    );
+  }
+
+  showPickSourceBottomSheet({
+    required Function(String) onPick,
+    required ControlNotifier controlNotifier,
+    required ScrollNotifier scrollNotifier,
+    required DraggableWidgetNotifier itemProvider,
+    // CropConfig? cropConfig,
+    required BuildContext context,
+  }) {
+    final picker = ImagePicker();
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.photo_library),
+                title: Text('Pick from gallery'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  if (controlNotifier.mediaPath.isEmpty) {
+                    scrollNotifier.pageController.animateToPage(1,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.ease);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Capture from camera'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final XFile? pickedImage = await picker.pickImage(
+                      source: ImageSource.camera,
+                      maxWidth: 2000,
+                      maxHeight: 2000,
+                      imageQuality: 60,
+                      requestFullMetadata: false);
+                  if (pickedImage?.path != null) {
+                    controlNotifier.mediaPath = pickedImage!.path;
+                    if (controlNotifier.mediaPath.isNotEmpty) {
+                      itemProvider.draggableWidget.insert(
+                          0,
+                          EditableItem()
+                            ..type = ItemType.image
+                            ..position = const Offset(0.0, 0));
+                    }
+                  }
+                  // if (pickedImage != null) onPick(pickedImage.path);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
