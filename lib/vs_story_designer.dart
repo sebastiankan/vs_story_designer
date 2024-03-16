@@ -136,6 +136,9 @@ class VSStoryDesigner extends StatefulWidget {
   /// on done
   final Function(String)? onDone;
 
+  /// on video pick
+  final Function(String) onVideoPick;
+
   /// on done button Text
   final Widget? onDoneButtonStyle;
 
@@ -160,6 +163,7 @@ class VSStoryDesigner extends StatefulWidget {
       this.giphyKey,
       this.themeType,
       required this.onDone,
+      required this.onVideoPick,
       this.middleBottomWidget,
       this.colorList,
       this.gradientColors,
@@ -225,6 +229,7 @@ class _VSStoryDesignerState extends State<VSStoryDesigner> {
         galleryThumbnailQuality: widget.galleryThumbnailQuality,
         centerText: widget.centerText,
         mediaPath: widget.mediaPath,
+        onVideoPick: widget.onVideoPick,
       ),
     );
   }

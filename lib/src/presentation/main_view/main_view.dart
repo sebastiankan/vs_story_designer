@@ -83,11 +83,14 @@ class MainView extends StatefulWidget {
 // share image file path
   final String? mediaPath;
 
+  final Function(String path) onVideoPick;
+
   MainView(
       {super.key,
       this.themeType,
       required this.giphyKey,
       required this.onDone,
+      required this.onVideoPick,
       this.middleBottomWidget,
       this.colorList,
       this.fileName,
@@ -455,11 +458,20 @@ class _MainViewState extends State<MainView> {
                         pathList: (path) {
                           controlNotifier.mediaPath = path[0].path!;
                           if (controlNotifier.mediaPath.isNotEmpty) {
-                            itemProvider.draggableWidget.insert(
-                                0,
-                                EditableItem()
-                                  ..type = ItemType.image
-                                  ..position = const Offset(0.0, 0));
+                            var fileFormat = path[0].path!.split('.').last;
+                            debugPrint("fileFormat: $fileFormat");
+                            if (fileFormat.toLowerCase() == 'mp4' ||
+                                fileFormat.toLowerCase() == 'mpeg' ||
+                                fileFormat.toLowerCase() == 'mov') {
+                              widget.onVideoPick(path[0].path!);
+                              return;
+                            } else {
+                              itemProvider.draggableWidget.insert(
+                                  0,
+                                  EditableItem()
+                                    ..type = ItemType.image
+                                    ..position = const Offset(0.0, 0));
+                            }
                           }
                           scrollProvider.pageController.animateToPage(0,
                               duration: const Duration(milliseconds: 300),

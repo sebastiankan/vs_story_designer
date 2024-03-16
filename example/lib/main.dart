@@ -82,6 +82,7 @@ class _ExampleState extends State<Example> {
                                     debugPrint(uri);
                                     Share.shareFiles([uri]);
                                   },
+                                  onVideoPick: (path) {},
                                   mediaPath: mediaPath,
                                 )));
                   },
