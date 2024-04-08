@@ -1,5 +1,6 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
+import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:oktoast/oktoast.dart';
@@ -290,24 +291,30 @@ class BottomTools extends StatelessWidget {
                 title: const Text('Capture from camera'),
                 onTap: () async {
                   Navigator.pop(context);
-                  final XFile? pickedImage = await picker.pickImage(
-                      source: ImageSource.camera,
-                      maxWidth: 2000,
-                      maxHeight: 2000,
-                      imageQuality: 60,
-                      requestFullMetadata: false);
-                  if (pickedImage?.path != null) {
-                    controlNotifier.mediaPath = pickedImage!.path;
-                    if (controlNotifier.mediaPath.isNotEmpty) {
-                      itemProvider.draggableWidget.insert(
-                          0,
-                          EditableItem()
-                            ..type = ItemType.image
-                            ..position = const Offset(0.0, 0));
-                    }
-                  }
-                  // if (pickedImage != null) onPick(pickedImage.path);
-                  Navigator.of(context).pop();
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => CameraAwesomeBuilder.awesome(
+                            // theme: AwesomeTheme(buttonTheme: AwesomeButtonTheme()),
+                            saveConfig: SaveConfig.photoAndVideo(),
+                            onMediaTap: (mediaCapture) {
+                              String? path = mediaCapture.captureRequest.path;
+                              if (path != null) {
+                                if (mediaCapture.isPicture) {
+                                  controlNotifier.mediaPath = path;
+                                  if (controlNotifier.mediaPath.isNotEmpty) {
+                                    itemProvider.draggableWidget.insert(
+                                        0,
+                                        EditableItem()
+                                          ..type = ItemType.image
+                                          ..position = const Offset(0.0, 0));
+                                  }
+                                } else {
+                                  // Video recorded
+                                  onPick(path);
+                                }
+                                Navigator.of(context).maybePop();
+                              }
+                            },
+                          )));
                 },
               ),
             ],

@@ -419,9 +419,9 @@ class _MainViewState extends State<MainView> {
                                 //     controlNotifier: controlNotifier,
                                 //     renderingNotifier: renderingNotifier,
                                 //     saveOnGallery: false),
-                                onDone: (bytes) {
+                                onDone: (path) {
                                   setState(() {
-                                    widget.onDone!(bytes);
+                                    widget.onDone!(path);
                                   });
                                 },
                                 onDoneButtonStyle: widget.onDoneButtonStyle,
@@ -449,7 +449,7 @@ class _MainViewState extends State<MainView> {
                         gridViewController: scrollProvider.gridController,
                         thumbnailQuality: widget.galleryThumbnailQuality,
                         singlePick: true,
-                        onlyImages: true,
+                        onlyImages: false,
                         appBarColor:
                             widget.editorBackgroundColor ?? Colors.black,
                         gridViewPhysics: itemProvider.draggableWidget.isEmpty
