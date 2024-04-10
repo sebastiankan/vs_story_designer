@@ -1,6 +1,9 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
+import 'dart:io';
+
 import 'package:camerawesome/camerawesome_plugin.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:oktoast/oktoast.dart';
@@ -12,6 +15,7 @@ import 'package:vs_story_designer/src/domain/providers/notifiers/draggable_widge
 import 'package:vs_story_designer/src/domain/providers/notifiers/painting_notifier.dart';
 import 'package:vs_story_designer/src/domain/providers/notifiers/scroll_notifier.dart';
 import 'package:vs_story_designer/src/domain/sevices/save_as_image.dart';
+import 'package:vs_story_designer/src/presentation/bar_tools/custom_awesome_camera_mode_selector.dart';
 import 'package:vs_story_designer/src/presentation/utils/constants/item_type.dart';
 import 'package:vs_story_designer/src/presentation/utils/constants/text_animation_type.dart';
 import 'package:vs_story_designer/src/presentation/widgets/animated_onTap_button.dart';
@@ -295,6 +299,22 @@ class BottomTools extends StatelessWidget {
                       builder: (context) => CameraAwesomeBuilder.awesome(
                             // theme: AwesomeTheme(buttonTheme: AwesomeButtonTheme()),
                             saveConfig: SaveConfig.photoAndVideo(),
+                            middleContentBuilder: (state) {
+                              return Column(
+                                children: [
+                                  const Spacer(),
+                                  if (state is PhotoCameraState &&
+                                      state.hasFilters)
+                                    AwesomeFilterWidget(state: state)
+                                  else if (!kIsWeb && Platform.isAndroid)
+                                    AwesomeZoomSelector(state: state),
+                                  SizedBox(
+                                      child: CustomAwesomeCameraModeSelector(
+                                          state: state)),
+                                  /* your custom widget */
+                                ],
+                              );
+                            },
                             onMediaTap: (mediaCapture) {
                               String? path = mediaCapture.captureRequest.path;
                               if (path != null) {
