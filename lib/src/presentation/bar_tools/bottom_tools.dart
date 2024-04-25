@@ -24,7 +24,7 @@ import 'package:vs_story_designer/src/presentation/widgets/animated_onTap_button
 
 class BottomTools extends StatelessWidget {
   final GlobalKey contentKey;
-  final Function(String imageUri) onDone;
+  final Function(List<Map<String, dynamic>> widgets) onDone;
   final Widget? onDoneButtonStyle;
   final Function? renderWidget;
 
@@ -68,7 +68,7 @@ class BottomTools extends StatelessWidget {
                             child: GestureDetector(
                               onTap: () {
                                 showPickSourceBottomSheet(
-                                    onPick: onDone,
+                                    // onPick: onDone,
                                     itemProvider: itemNotifier,
                                     scrollNotifier: scrollNotifier,
                                     controlNotifier: controlNotifier,
@@ -187,22 +187,28 @@ class BottomTools extends StatelessWidget {
                         debugPrint('creating video');
                         await renderWidget!();
                       } else {
-                        debugPrint('creating image');
-                        await takePicture(
-                                contentKey: contentKey,
-                                context: context,
-                                saveToGallery: false,
-                                fileName: controlNotifier.folderName)
-                            .then((bytes) {
-                          Navigator.of(context, rootNavigator: true).pop();
-                          if (bytes != null) {
-                            pngUri = bytes;
-                            onDone(pngUri);
-                          } else {
-                            // ignore: avoid_print
-                            print("error");
-                          }
-                        });
+                        List<Map<String, dynamic>> widgets = itemNotifier
+                            .draggableWidget
+                            .map((e) => e.toJson())
+                            .toList();
+                        onDone(widgets);
+                        // debugPrint('creating image');
+                        // var json = s
+                        // await takePicture(
+                        //         contentKey: contentKey,
+                        //         context: context,
+                        //         saveToGallery: false,
+                        //         fileName: controlNotifier.folderName)
+                        //     .then((bytes) {
+                        //   Navigator.of(context, rootNavigator: true).pop();
+                        //   if (bytes != null) {
+                        //     pngUri = bytes;
+                        //     onDone(pngUri);
+                        //   } else {
+                        //     // ignore: avoid_print
+                        //     print("error");
+                        //   }
+                        // });
                       }
                     } else {
                       showToast('Design something to save image');
@@ -263,7 +269,7 @@ class BottomTools extends StatelessWidget {
   }
 
   showPickSourceBottomSheet({
-    required Function(String) onPick,
+    // required Function(String) onPick,
     required ControlNotifier controlNotifier,
     required ScrollNotifier scrollNotifier,
     required DraggableWidgetNotifier itemProvider,
@@ -325,11 +331,22 @@ class BottomTools extends StatelessWidget {
                                         0,
                                         EditableItem()
                                           ..type = ItemType.image
+                                          ..mediaPath = path
                                           ..position = const Offset(0.0, 0));
                                   }
                                 } else {
                                   // Video recorded
-                                  onPick(path);
+                                  // onPick(path);
+                                  controlNotifier.mediaPath = path;
+                                  if (controlNotifier.mediaPath.isNotEmpty) {
+                                    itemProvider.draggableWidget.insert(
+                                        0,
+                                        EditableItem()
+                                          ..type = ItemType.video
+                                          ..mediaPath = path
+                                          ..position = const Offset(0.0, 0)
+                                          ..createVideoController());
+                                  }
                                 }
                                 Navigator.of(context).maybePop();
                               }

@@ -78,9 +78,9 @@ class _ExampleState extends State<Example> {
                                   themeType: ThemeType
                                       .light, // OPTIONAL, Default ThemeType.dark
                                   galleryThumbnailQuality: 250,
-                                  onDone: (uri) {
-                                    debugPrint(uri);
-                                    Share.shareFiles([uri]);
+                                  onDone: (widgetsjson) {
+                                    debugPrint(widgetsjson.toString());
+                                    // Share.shareFiles([widgetsjson]);
                                   },
                                   onVideoPick: (path) {},
                                   mediaPath: mediaPath,

@@ -134,7 +134,7 @@ class VSStoryDesigner extends StatefulWidget {
   final Widget? middleBottomWidget;
 
   /// on done
-  final Function(String)? onDone;
+  final Function(Map<String, dynamic>)? onDone;
 
   /// on video pick
   final Function(String) onVideoPick;

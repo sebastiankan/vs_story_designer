@@ -61,24 +61,24 @@ class _TopToolsState extends State<TopTools> {
 
                 Row(
                   children: [
-                    if (controlNotifier.mediaPath.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 0),
-                        child: _selectColor(
-                            controlProvider: controlNotifier,
-                            onTap: () {
-                              if (controlNotifier.gradientIndex >=
-                                  controlNotifier.gradientColors!.length - 1) {
-                                setState(() {
-                                  controlNotifier.gradientIndex = 0;
-                                });
-                              } else {
-                                setState(() {
-                                  controlNotifier.gradientIndex += 1;
-                                });
-                              }
-                            }),
-                      ),
+                    // if (controlNotifier.mediaPath.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 0),
+                      child: _selectColor(
+                          controlProvider: controlNotifier,
+                          onTap: () {
+                            if (controlNotifier.gradientIndex >=
+                                controlNotifier.gradientColors!.length - 1) {
+                              setState(() {
+                                controlNotifier.gradientIndex = 0;
+                              });
+                            } else {
+                              setState(() {
+                                controlNotifier.gradientIndex += 1;
+                              });
+                            }
+                          }),
+                    ),
                     ToolButton(
                       backGroundColor: Colors.black12,
                       onTap: () => controlNotifier.isTextEditing =

@@ -12,111 +12,72 @@ import 'package:video_player/video_player.dart';
 import 'package:vs_story_designer/src/domain/models/editable_items.dart';
 import 'package:vs_story_designer/src/domain/providers/notifiers/control_provider.dart';
 import 'package:vs_story_designer/src/domain/providers/notifiers/draggable_widget_notifier.dart';
-import 'package:vs_story_designer/src/domain/providers/notifiers/gradient_notifier.dart';
 import 'package:vs_story_designer/src/domain/providers/notifiers/text_editing_notifier.dart';
 import 'package:vs_story_designer/src/presentation/utils/constants/font_family.dart';
 import 'package:vs_story_designer/src/presentation/utils/constants/item_type.dart';
-// import 'package:vs_story_designer/src/presentation/utils/constants/text_animation_type.dart';
-import 'package:vs_story_designer/src/presentation/widgets/animated_onTap_button.dart';
-import 'package:vs_story_designer/src/presentation/widgets/file_image_bg.dart';
 
-class DraggableWidget extends StatefulWidget {
+class CustomDraggableWidget extends StatefulWidget {
   final EditableItem draggableWidget;
   final Function(PointerDownEvent)? onPointerDown;
   final Function(PointerUpEvent)? onPointerUp;
   final Function(PointerMoveEvent)? onPointerMove;
+  final Function()? didLoadVideo;
   final BuildContext context;
   final String? mediaPath;
-  const DraggableWidget(
+  final List<Color>? gradientColors;
+  const CustomDraggableWidget(
       {super.key,
       required this.context,
       required this.draggableWidget,
+      required this.didLoadVideo,
       this.onPointerDown,
       this.onPointerUp,
       this.onPointerMove,
+      this.gradientColors,
       this.mediaPath});
 
   @override
-  State<DraggableWidget> createState() => _DraggableWidgetState();
+  State<CustomDraggableWidget> createState() => _CustomDraggableWidgetState();
 }
 
-class _DraggableWidgetState extends State<DraggableWidget> {
+class _CustomDraggableWidgetState extends State<CustomDraggableWidget> {
   ChewieController? _chewieController;
   VideoPlayerController? _videoPlayerController;
   Future<void>? _future;
 
   Future<void> initVideoPlayer() async {
     await _videoPlayerController?.initialize();
-    setState(() {
-      _chewieController = ChewieController(
-        videoPlayerController: _videoPlayerController!,
-        aspectRatio: _videoPlayerController?.value.aspectRatio,
-        showControls: false,
-        allowFullScreen: false,
-        allowMuting: false,
-        allowPlaybackSpeedChanging: false,
-        autoPlay: false,
-        looping: false,
-      );
-    });
+    _chewieController = ChewieController(
+      videoPlayerController: _videoPlayerController!,
+      aspectRatio: _videoPlayerController?.value.aspectRatio,
+      showControls: false,
+      allowFullScreen: false,
+      allowMuting: false,
+      allowPlaybackSpeedChanging: false,
+      autoPlay: false,
+      looping: false,
+    );
+    widget.didLoadVideo!();
+    setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    String? path;
-    if (widget.mediaPath != null) {
-      path = widget.mediaPath;
-    } else {
-      var _controlProvider =
-          Provider.of<ControlNotifier>(context, listen: false);
-      path = _controlProvider.mediaPath;
+    _videoPlayerController = widget.draggableWidget.videoPlayerController;
+    if (_videoPlayerController != null) {
+      _future = initVideoPlayer();
     }
-
-    if (isVideoPath(path ?? "")) {
-      if ((path?.isNotEmpty ?? false) && _chewieController == null) {
-        _videoPlayerController =
-            VideoPlayerController.file(File.fromUri(Uri.parse(path!)));
-        _future = initVideoPlayer();
-      }
-    }
-  }
-
-  bool isVideoPath(String path) {
-    debugPrint(path);
-    return path.toLowerCase().contains(".mp4") ||
-        path.contains(".mkv") ||
-        path.contains(".avi");
   }
 
   @override
-  void didUpdateWidget(covariant DraggableWidget oldWidget) {
+  void didUpdateWidget(covariant CustomDraggableWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    var _controlProvider = Provider.of<ControlNotifier>(context, listen: false);
-    String? path = _controlProvider.mediaPath;
-    if (isVideoPath(path)) {
-      if (_controlProvider.mediaPath.isNotEmpty && _chewieController == null) {
-        VideoPlayerController videoPlayerController =
-            VideoPlayerController.file(
-                File.fromUri(Uri.parse(_controlProvider.mediaPath)));
-        videoPlayerController.initialize().then((value) {
-          _chewieController = ChewieController(
-              videoPlayerController: videoPlayerController,
-              aspectRatio: videoPlayerController.value.aspectRatio,
-              showControls: false,
-              autoInitialize: false,
-              autoPlay: true);
-        });
-        setState(() {});
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     var _size = MediaQuery.of(context).size;
-    var _colorProvider = Provider.of<GradientNotifier>(context, listen: false);
-    var _controlProvider = Provider.of<ControlNotifier>(context, listen: false);
     Widget? overlayWidget;
 
     switch (widget.draggableWidget.type) {
@@ -131,41 +92,37 @@ class _DraggableWidgetState extends State<DraggableWidget> {
               ),
               width: widget.draggableWidget.deletePosition ? 100 : null,
               height: widget.draggableWidget.deletePosition ? 100 : null,
-              child: AnimatedOnTapButton(
-                onTap: () =>
-                    _onTap(context, widget.draggableWidget, _controlProvider),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Center(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Center(
+                    child: _text(
+                        background: true,
+                        paintingStyle: PaintingStyle.fill,
+                        controlNotifier: ControlNotifier()),
+                  ),
+                  IgnorePointer(
+                    ignoring: true,
+                    child: Center(
                       child: _text(
                           background: true,
-                          paintingStyle: PaintingStyle.fill,
-                          controlNotifier: _controlProvider),
+                          paintingStyle: PaintingStyle.stroke,
+                          controlNotifier: ControlNotifier()),
                     ),
-                    IgnorePointer(
-                      ignoring: true,
-                      child: Center(
-                        child: _text(
-                            background: true,
-                            paintingStyle: PaintingStyle.stroke,
-                            controlNotifier: _controlProvider),
-                      ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 0, top: 0),
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: _text(
+                              paintingStyle: PaintingStyle.fill,
+                              controlNotifier: ControlNotifier()),
+                        ),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 0, top: 0),
-                      child: Stack(
-                        children: [
-                          Center(
-                            child: _text(
-                                paintingStyle: PaintingStyle.fill,
-                                controlNotifier: _controlProvider),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
+                  )
+                ],
               ),
             ),
           ),
@@ -174,17 +131,9 @@ class _DraggableWidgetState extends State<DraggableWidget> {
 
       /// image [file_image_gb.dart]
       case ItemType.image:
-        if (_controlProvider.mediaPath.isNotEmpty) {
+        if (widget.mediaPath?.isNotEmpty ?? false) {
           overlayWidget = SizedBox(
-            width: _size.width,
-            child: FileImageBG(
-              filePath: File(_controlProvider.mediaPath),
-              generatedGradient: (color1, color2) {
-                _colorProvider.color1 = color1;
-                _colorProvider.color2 = color2;
-              },
-            ),
-          );
+              width: _size.width, child: Image.network(widget.mediaPath!));
         } else {
           overlayWidget = Container();
         }
@@ -222,19 +171,19 @@ class _DraggableWidgetState extends State<DraggableWidget> {
               width: _size.width,
               decoration:
                   BoxDecoration(borderRadius: BorderRadius.circular(16)),
-              child: FutureBuilder(
-                  future: _future,
-                  builder: (context, snapshot) {
-                    return AspectRatio(
-                      aspectRatio: _chewieController!
-                          .videoPlayerController.value.aspectRatio,
-                      child: IgnorePointer(
+              child: IgnorePointer(
+                child: FutureBuilder(
+                    future: _future,
+                    builder: (context, snapshot) {
+                      return AspectRatio(
+                        aspectRatio: _chewieController!
+                            .videoPlayerController.value.aspectRatio,
                         child: Chewie(
                           controller: _chewieController!,
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    }),
+              ),
             ),
           );
         } else {
@@ -247,7 +196,7 @@ class _DraggableWidgetState extends State<DraggableWidget> {
       duration: const Duration(milliseconds: 50),
       dy: (widget.draggableWidget.deletePosition
           ? _deleteTopOffset(_size)
-          : (widget.draggableWidget.position.dy * _size.height)),
+          : ((widget.draggableWidget.position.dy * _size.height))),
       dx: (widget.draggableWidget.deletePosition
           ? 0
           : (widget.draggableWidget.position.dx * _size.width)),

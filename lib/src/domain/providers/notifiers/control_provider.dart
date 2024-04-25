@@ -8,8 +8,6 @@ import 'package:vs_story_designer/vs_story_designer.dart';
 
 class ControlNotifier extends ChangeNotifier {
   String _giphyKey = '';
-
-  /// is required add your giphy API KEY
   String get giphyKey => _giphyKey;
   set giphyKey(String key) {
     _giphyKey = key;
@@ -22,7 +20,6 @@ class ControlNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  // theme type
   ThemeType? _themeType;
   ThemeType get themeType => _themeType!;
   set themeType(ThemeType key) {
@@ -33,49 +30,27 @@ class ControlNotifier extends ChangeNotifier {
   String _folderName = "";
 
   int _gradientIndex = Random().nextInt(50);
-
-  /// current gradient index
   int get gradientIndex => _gradientIndex;
-
-  /// get current gradient index
   set gradientIndex(int index) {
-    /// set new current gradient index
     _gradientIndex = index;
     notifyListeners();
   }
 
   bool _isTextEditing = false;
-
-  /// is text editor open
   bool get isTextEditing => _isTextEditing;
-
-  /// get bool if is text editing
   set isTextEditing(bool val) {
-    /// set bool if is text editing
     _isTextEditing = val;
     notifyListeners();
   }
 
   bool _isPainting = false;
-
-  /// is painter sketcher open
   bool get isPainting => _isPainting;
   set isPainting(bool painting) {
     _isPainting = painting;
     notifyListeners();
   }
 
-  // List<String>? _fontList = fontFamilyList;
-
-  // /// here you can define your own font family list
-  // List<String>? get fontList => _fontList;
-  // set fontList(List<String>? fonts) {
-  //   _fontList = fonts;
-  //   notifyListeners();
-  // }
   List<FontType>? _fontList = AppFonts.fontFamilyListENUM;
-
-  /// here you can define your own font family list
   List<FontType>? get fontList => _fontList;
   set fontList(List<FontType>? fonts) {
     _fontList = fonts;
@@ -83,8 +58,6 @@ class ControlNotifier extends ChangeNotifier {
   }
 
   bool _isCustomFontList = false;
-
-  /// if you add your custom list is required to specify your app package
   bool get isCustomFontList => _isCustomFontList;
   set isCustomFontList(bool key) {
     _isCustomFontList = key;
@@ -92,8 +65,6 @@ class ControlNotifier extends ChangeNotifier {
   }
 
   List<List<Color>>? _gradientColors = gradientBackgroundColors;
-
-  /// here you can define your own background gradients
   List<List<Color>>? get gradientColors => _gradientColors;
   set gradientColors(List<List<Color>>? color) {
     _gradientColors = color;
@@ -101,8 +72,6 @@ class ControlNotifier extends ChangeNotifier {
   }
 
   Widget? _middleBottomWidget;
-
-  /// you can add a custom widget on the bottom
   Widget? get middleBottomWidget => _middleBottomWidget;
   set middleBottomWidget(Widget? widget) {
     _middleBottomWidget = widget;
@@ -110,8 +79,6 @@ class ControlNotifier extends ChangeNotifier {
   }
 
   Future<bool>? _exitDialogWidget;
-
-  /// you can create you own exit window
   Future<bool>? get exitDialogWidget => _exitDialogWidget;
   set exitDialogWidget(Future<bool>? widget) {
     _exitDialogWidget = widget;
@@ -119,15 +86,12 @@ class ControlNotifier extends ChangeNotifier {
   }
 
   List<Color>? _colorList = defaultColors;
-
-  /// you can add your own color palette list
   List<Color>? get colorList => _colorList;
   set colorList(List<Color>? value) {
     _colorList = value;
     notifyListeners();
   }
 
-  /// get image path
   String _mediaPath = '';
   String get mediaPath => _mediaPath;
   set mediaPath(String media) {
@@ -149,7 +113,6 @@ class ControlNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  ///////
   bool _enableTextShadow = true;
   bool get enableTextShadow => _enableTextShadow;
   set enableTextShadow(bool filter) {
@@ -157,5 +120,50 @@ class ControlNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  ////
+  ControlNotifier() {}
+
+  // fromJson constructor
+  ControlNotifier.fromJson(Map<String, dynamic> json) {
+    _giphyKey = json['giphyKey'] ?? '';
+    _folderName = json['folderName'] ?? '';
+    _themeType = _parseThemeType(json['themeType']);
+    _gradientIndex = json['gradientIndex'] ?? Random().nextInt(50);
+    _isTextEditing = json['isTextEditing'] ?? false;
+    _isPainting = json['isPainting'] ?? false;
+    _fontList = _parseFontList(json['fontList']);
+    _isCustomFontList = json['isCustomFontList'] ?? false;
+    _gradientColors = _parseGradientColors(json['gradientColors']);
+    _mediaPath = json['mediaPath'];
+    // Add other fields as needed
+  }
+
+  // toJson method
+  Map<String, dynamic> toJson() {
+    return {
+      'mediaPath': _mediaPath,
+      'gradientColor':
+          _gradientColors?[_gradientIndex].map((color) => color.value).toList()
+      // Add other fields as needed
+    };
+  }
+
+  // Helper method to parse ThemeType enum from int value
+  ThemeType _parseThemeType(int? index) {
+    return index != null
+        ? ThemeType.values[index]
+        : ThemeType.light; // Set a default value if needed
+  }
+
+// Helper method to parse FontType enum list from List<int> value
+  List<FontType>? _parseFontList(List<int>? indices) {
+    return indices?.map((index) => FontType.values[index]).toList();
+  }
+
+  // Helper method to parse gradient colors list from List<List<int>> value
+  List<List<Color>>? _parseGradientColors(List<List<int>>? colorValues) {
+    return colorValues
+        ?.map(
+            (colors) => colors.map((colorValue) => Color(colorValue)).toList())
+        .toList();
+  }
 }

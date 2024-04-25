@@ -58,7 +58,7 @@ class MainView extends StatefulWidget {
   final Widget? middleBottomWidget;
 
   /// on done
-  final Function(String)? onDone;
+  final Function(Map<String, dynamic>)? onDone;
 
   /// on done button Text
   final Widget? onDoneButtonStyle;
@@ -128,6 +128,8 @@ class _MainViewState extends State<MainView> {
   /// screen size
   final _screenSize = MediaQueryData.fromView(WidgetsBinding.instance.window);
 
+  List<EditableItem>? _draggableWidgets;
+
   /// recorder controller
   // final WidgetRecorderController _recorderController =
   //     WidgetRecorderController();
@@ -151,6 +153,7 @@ class _MainViewState extends State<MainView> {
             0,
             EditableItem()
               ..type = ItemType.image
+              ..mediaPath = widget.mediaPath
               ..position = const Offset(0.0, 0));
       }
       if (widget.gradientColors != null) {
@@ -189,6 +192,7 @@ class _MainViewState extends State<MainView> {
               TextEditingNotifier>(
             builder: (context, controlNotifier, itemProvider, scrollProvider,
                 colorProvider, paintingProvider, editingProvider, child) {
+              _draggableWidgets = itemProvider.draggableWidget;
               // return Consumer<RenderingNotifier>(
               //   builder: (_, renderingNotifier, __) {
               return SafeArea(
@@ -234,24 +238,25 @@ class _MainViewState extends State<MainView> {
                                           const Duration(milliseconds: 200),
                                       decoration: BoxDecoration(
                                           //borderRadius: BorderRadius.circular(25),
-                                          gradient: controlNotifier
-                                                  .mediaPath.isEmpty
-                                              ? LinearGradient(
-                                                  colors: controlNotifier
-                                                          .gradientColors![
-                                                      controlNotifier
-                                                          .gradientIndex],
-                                                  begin: Alignment.topLeft,
-                                                  end: Alignment.bottomRight,
-                                                )
-                                              : LinearGradient(
-                                                  colors: [
-                                                    colorProvider.color1,
-                                                    colorProvider.color2
-                                                  ],
-                                                  begin: Alignment.topCenter,
-                                                  end: Alignment.bottomCenter,
-                                                )),
+                                          gradient:
+                                              //  controlNotifier
+                                              //         .mediaPath.isEmpty
+                                              //     ?
+                                              LinearGradient(
+                                        colors: controlNotifier.gradientColors![
+                                            controlNotifier.gradientIndex],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      )
+                                          // : LinearGradient(
+                                          //     colors: [
+                                          //       colorProvider.color1,
+                                          //       colorProvider.color2
+                                          //     ],
+                                          //     begin: Alignment.topCenter,
+                                          //     end: Alignment.bottomCenter,
+                                          //   )
+                                          ),
                                       child: GestureDetector(
                                         onScaleStart: _onScaleStart,
                                         onScaleUpdate: _onScaleUpdate,
@@ -419,9 +424,41 @@ class _MainViewState extends State<MainView> {
                                 //     controlNotifier: controlNotifier,
                                 //     renderingNotifier: renderingNotifier,
                                 //     saveOnGallery: false),
-                                onDone: (path) {
+                                onDone: (widgetsJson) {
                                   setState(() {
-                                    widget.onDone!(path);
+                                    widget.onDone!({
+                                      'widgets': widgetsJson,
+                                      'lines': paintingProvider.lines
+                                          .map((e) => e.toJson())
+                                          .toList(),
+                                      'backgroundColor':
+                                          widget.editorBackgroundColor,
+                                      'gradient': {
+                                        'colors': (
+                                                // controlNotifier
+                                                //           .mediaPath.isEmpty &&
+                                                controlNotifier
+                                                        .gradientColors !=
+                                                    null)
+                                            ? controlNotifier.gradientColors![
+                                                    controlNotifier
+                                                        .gradientIndex]
+                                                .map((color) => color.value)
+                                                .toList()
+                                            : [
+                                                colorProvider.color1.value,
+                                                colorProvider.color2.value
+                                              ],
+                                        'begin':
+                                            controlNotifier.mediaPath.isEmpty
+                                                ? 'top_left'
+                                                : 'top_center',
+                                        'end': controlNotifier.mediaPath.isEmpty
+                                            ? 'bottom_right'
+                                            : 'bottom_center',
+                                      },
+                                      'control': controlNotifier.toJson(),
+                                    });
                                   });
                                 },
                                 onDoneButtonStyle: widget.onDoneButtonStyle,
@@ -450,6 +487,7 @@ class _MainViewState extends State<MainView> {
                         thumbnailQuality: widget.galleryThumbnailQuality,
                         singlePick: true,
                         onlyImages: false,
+                        maxPickImages: 1,
                         appBarColor:
                             widget.editorBackgroundColor ?? Colors.black,
                         gridViewPhysics: itemProvider.draggableWidget.isEmpty
@@ -463,13 +501,20 @@ class _MainViewState extends State<MainView> {
                             if (fileFormat.toLowerCase() == 'mp4' ||
                                 fileFormat.toLowerCase() == 'mpeg' ||
                                 fileFormat.toLowerCase() == 'mov') {
-                              widget.onVideoPick(path[0].path!);
-                              return;
+                              itemProvider.draggableWidget.insert(
+                                  0,
+                                  EditableItem()
+                                    ..type = ItemType.video
+                                    ..mediaPath = path[0].path!
+                                    ..position = const Offset(0.0, 0)
+                                    ..createVideoController());
+                              // widget.onVideoPick(path[0].path!);
                             } else {
                               itemProvider.draggableWidget.insert(
                                   0,
                                   EditableItem()
                                     ..type = ItemType.image
+                                    ..mediaPath = controlNotifier.mediaPath
                                     ..position = const Offset(0.0, 0));
                             }
                           }
@@ -712,5 +757,9 @@ class _MainViewState extends State<MainView> {
 
     /// set vibrate
     HapticFeedback.lightImpact();
+  }
+
+  List<Map<String, dynamic>>? widgetsJson() {
+    return _draggableWidgets?.map((e) => e.toJson()).toList();
   }
 }
